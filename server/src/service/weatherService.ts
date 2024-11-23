@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,34 +10,56 @@ interface Coordinates{
 
 // TODO: Define a class for the Weather object
 class Weather{
-temperature: number;
-description: string;
-humidty: number;
-wind: number;
+city:string;
+date: dayjs.Dayjs;
+icon: string;
+iconDescription: string;
+tempF: number;
+windSpeed: number;
+humidity: number;
+
+
+
 // constructor
 constructor(
-  temperature:number, 
-  description: string,
-   humidty: number, 
-   wind: number) {
+  city:string,
+  date: dayjs.Dayjs,
+  icon:string,
+  description: string, 
+  tempF:number,
+   windSpeed: number,
+   humidity: number, 
+  ) {
+
+  this.city = city;
+  this.date = date;
+  this.icon = icon;
+  this.iconDescription = description;
+  this.tempF = tempF;
+  this.windSpeed = windSpeed;
+  this.humidity = humidity; 
   
-  this.temperature = temperature;
-  this.description = description;
-  this.humidty = humidty;
-  this.wind = wind;  
+  }
+   getFormattedDate(format: string = 'MM/DD/YYYY'): string {
+    return this.date.format(format);
   }
 }
 
 // TODO: Complete the WeatherService class
 class WeatherService {
   //  Define the baseURL, API key, and city name properties
-  private baseURL: string = 'https:api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}'
+  private baseURL: string = 'https://api.openweathermap.org/'
   private apiKey: string = '36ade06f1ca155fbd0b7dc5305fdd069';
 
   
   // TODO: Create fetchLocationData method
   private async fetchLocationData(query: string) {
   const url = this.buildGeocodeQuery(query);
+  if(!url){
+    console.error("Error: URL could not be constructed from the query.") 
+    return;
+  }
+  console.log("Constructed URL:", url);
   return  this.fetchData(url);
   }
   // TODO: Create destructureLocationData method
@@ -48,6 +71,7 @@ class WeatherService {
    }
    //Fetchdata method
    private async fetchData(url: string): Promise<any>{
+    console.log(url);
     const response = await fetch(url);
     if(!response.ok){
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +84,7 @@ class WeatherService {
   }
   // TODO: Create buildWeatherQuery method
   private buildWeatherQuery(coordinates: Coordinates): string {
-    return `${this.baseURL}forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}`;
+    return `${this.baseURL}data/2.5/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}`;
   }
   // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData(query: string):Promise<Coordinates> {
@@ -75,11 +99,22 @@ class WeatherService {
   // TODO: Build parseCurrentWeather method
   private parseCurrentWeather(response: any) {
     const currentWeather = response.list[0];
-    return new Weather(currentWeather.main.temp,currentWeather[0].description,currentWeather.main.humidty,currentWeather.main.wind);
+    console.log(currentWeather);
+    const date = dayjs(currentWeather.dt_txt);
+    return new Weather(currentWeather.cityName,date,currentWeather.weather[0].icon,currentWeather.weather[0].description,currentWeather.main.temp,currentWeather.wind.speed,currentWeather.main.humidity);
   }
   // TODO: Complete buildForecastArray method
-   private buildForecastArray(currentWeather: Weather, weatherData: any[]): Weather[] {
-    const forecastArray=weatherData.map(data => new Weather(data.main.temp,data.weather[0].description,data.main.humidty,data.main.wind));
+   private buildForecastArray(currentWeather: Weather,weatherData:any[]): Weather[] {
+    console.log(weatherData)
+    const forecastArray=weatherData.map(data => new Weather(data.cityName,data.date,data.weather[0].icon,data.weather[0].description,data.main.temp,data.
+      
+      
+      
+      
+      
+      
+      
+      wind.speed,data.main.humidity));
     return [currentWeather,...forecastArray];
    }
   // TODO: Complete getWeatherForCity method

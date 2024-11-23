@@ -1,5 +1,5 @@
 
-const fs = require('fs').promises; 
+import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid'; 
 // City class
 class City{
@@ -17,7 +17,7 @@ class City{
 class HistoryService {
   private filePath: string;
   constructor(){
-    this.filePath='server/db/searchHistory.json'
+    this.filePath='db/db.json'
   }
   // TODO: Define a read method that reads from the searchHistory.json file
   private async read(): Promise<City[]> {
